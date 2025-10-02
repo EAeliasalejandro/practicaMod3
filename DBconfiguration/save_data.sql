@@ -1,4 +1,5 @@
 -- Usuarios
+--24/02/1998 <-- formato mal '1985-01-15'
 INSERT INTO usuarios (nombre, correo, telefono, fecha_nacimiento) VALUES
 ('Juan Pérez', 'juan.perez@example.com', '777-111-2233', '1990-03-15'),
 ('María López', 'maria.lopez@example.com', '777-444-5566', '1992-08-21'),
