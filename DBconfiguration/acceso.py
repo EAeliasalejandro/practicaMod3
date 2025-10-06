@@ -57,6 +57,63 @@ def obtener_datos_usuario(username, password):
     except Exception as e:
         print("Error al consultar la base de datos:", e)
 
+def insertar_usuario(nombre, correo, telefono, fecha_nacimiento, username, password):
+    conn = conectar_db()
+    #Si no logra conectarse, no sigue
+    if not conn:
+        return
+    
+    try:
+        cursor = conn.cursor() #Crear el cursor
+        #Insertar usuario en la tabla
+        cursor.execute(
+            """
+            INSERT INTO usuarios(nombre, correo, telefono, fecha_nacimiento)
+            VALUES (%s,%s,%s,%s) RETURNING id_usuario;
+            """,(nombre,correo,telefono,fecha_nacimiento))
+        # Guardar id del nuevo usuario
+        id_usuario = cursor.fetchone()[0]
+
+        #Almacenamos las credenciales
+        cursor.execute(
+            """
+            INSERT INTO credenciales(id_usuario, username, password_hash)
+            VALUES (%s,%s,%s);
+            """,(id_usuario, username, password))
+        
+        #Confirmar los cambios en la base de datos
+        conn.commit()
+        print("Usuario y la credencial han sido insertados correctamente")
+    #Si ocurre un error..
+    except Exception as e:
+        print("Error al insertar: ",e)
+        #Revierte cualquier cambio
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+def actualizar_correo(id_usuario, nuevo_correo):
+    conn = conectar_db()
+    if not conn:
+        return
+    try:
+        cursor = conn.cursor()
+        #Actualización
+        cursor.execute("UPDATE usuarios SET correo = %s WHERE id_usuario = %s"),(nuevo_correo, id_usuario)
+
+        #Ejecutar cambios
+        conn.commit()
+        print("Correo actualizado correctamente")
+    except Exception as e:
+        print("Error al actualizar: ",e)
+        #Revierte cualquier cambio
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+
 if __name__ == "__main__":
     #print("Inicio de sesión en la base de datos")
     # Solicitar credenciales al usuario
@@ -64,11 +121,15 @@ if __name__ == "__main__":
     #pwd = getpass.getpass("Ingrese su contraseña: ")#No muestra la contraseña a escribir
     #Consultar base de datos
     #obtener_datos_usuario(user, pwd)
-    print("Insertar datos")
-    nombreNuevo = input("Ingresa el nombre del nuevo usuario")
-    correo = input("Ingresa el correo")
-    telefono = input("Ingresa el telefono")
-    fecha_nacimiento = input("Ingresa la fecha de nacimiento")
-    usuario = input("Ingresa nombre de usuario nuevo")
-    contra = input("Ingresa contraseña nueva")
-    insertar_usuario(nombreNuevo, correo, telefono, fecha_nacimiento, usuario,contra)
+    #print("Insertar datos")
+    #nombreNuevo = input("Ingresa el nombre del nuevo usuario")
+    #correo = input("Ingresa el correo")
+    #telefono = input("Ingresa el telefono")
+    #fecha_nacimiento = input("Ingresa la fecha de nacimiento")
+    #usuario = input("Ingresa nombre de usuario nuevo")
+    #contra = input("Ingresa contraseña nueva")
+    #insertar_usuario(nombreNuevo, correo, telefono, fecha_nacimiento, usuario,contra)
+    print("Actualizar correo")
+    id_usuario = input("Comparte el id del usuario al que deseas modificar")
+    correoNuevo = input("Comparte el correo nuevo")
+    actualizar_correo(id_usuario, correoNuevo)
